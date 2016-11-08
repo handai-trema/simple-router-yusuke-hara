@@ -8,10 +8,11 @@ class SimpleRouter < Trema::Controller
   def start(_args)
     load File.join(__dir__, '..', 'simple_router.conf')
     @interfaces = Interfaces.new(Configuration::INTERFACES)
+
     @arp_table = ArpTable.new
     @routing_table = RoutingTable.new(Configuration::ROUTES)
     @unresolved_packet_queue = Hash.new { [] }
-    logger.info "#{name} started."
+    logger.info "#{name} started. by hara"
   end
 
   def switch_ready(dpid)
@@ -86,6 +87,19 @@ class SimpleRouter < Trema::Controller
                  destination_ip: message.source_ip_address,
                  data: create_icmp_reply(icmp_request))
     end
+  end
+
+  def show_routing_table()
+    return   @routing_table.show()
+  end
+  def add_routing_tabel_entry(dest,netmask,next_hop)
+    @routing_table.add({:destination=>dest,:netmask_length=>netmask,:next_hop=>next_hop})
+  end
+  def delete_routing_tabel_entry(dest,netmask)
+    @routing_table.delete({:destination=>dest,:netmask_length=>netmask})
+  end
+  def show_interface()
+    return @interfaces.show()
   end
   # rubocop:enable MethodLength
 
@@ -172,5 +186,6 @@ class SimpleRouter < Trema::Controller
                     raw_data: arp_request.to_binary,
                     actions: SendOutPort.new(interface.port_number))
   end
+
 end
 # rubocop:enable ClassLength

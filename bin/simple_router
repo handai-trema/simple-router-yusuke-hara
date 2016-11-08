@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler'
+Bundler.setup :default
+
+require 'gli'
+require 'trema'
+
+# patch_panel command
+module SimpleRouterApp
+  extend GLI::App
+
+  desc 'Show routing table'
+  arg_name ''
+  command :show_routing_table do |c|
+    c.desc 'Location to find socket files'
+    c.flag [:S, :socket_dir], default_value: Trema::DEFAULT_SOCKET_DIR
+
+    c.action do |_global_options, options, args|
+      ret = Trema.trema_process('SimpleRouter', options[:socket_dir]).controller.
+        show_routing_table()
+      puts(ret)
+    end
+  end
+  desc 'Show interfaces'
+  arg_name ''
+  command :show_interfaces do |c|
+    c.desc 'Location to find socket files'
+    c.flag [:S, :socket_dir], default_value: Trema::DEFAULT_SOCKET_DIR
+
+    c.action do |_global_options, options, args|
+      ret = Trema.trema_process('SimpleRouter', options[:socket_dir]).controller.
+        show_interface()
+      puts(ret)
+    end
+  end
+  desc 'Add routing table entry'
+  arg_name 'destination netmask_length next_hop'
+  command :add do |c|
+    c.desc 'Location to find socket files'
+    c.flag [:S, :socket_dir], default_value: Trema::DEFAULT_SOCKET_DIR
+
+    c.action do |_global_options, options, args|
+      destination = args[0]
+      netmask_length = args[1].to_i
+      next_hop = args[2]
+      Trema.trema_process('SimpleRouter', options[:socket_dir]).controller.
+        add_routing_tabel_entry(destination,netmask_length,next_hop)
+    end
+  end
+
+  desc 'delete outing table entry'
+  arg_name 'destination netmask_length'
+  command :delete do |c|
+    c.desc 'Location to find socket files'
+    c.flag [:S, :socket_dir], default_value: Trema::DEFAULT_SOCKET_DIR
+
+    c.action do |_global_options, options, args|
+      destination = args[0]
+      netmask_length = args[1].to_i
+      Trema.trema_process('SimpleRouter', options[:socket_dir]).controller.
+        delete_routing_tabel_entry(destination,netmask_length)
+    end
+  end
+
+  exit run(ARGV)
+end

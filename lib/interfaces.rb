@@ -24,6 +24,13 @@ class Interfaces
       Interface.new(each)
     end
   end
+  def show()
+    str = sprintf("%-5s %-20s %-15s %-10s\n", "port", "mac_address", "ip_address", "netmask")
+    @list.each do |each|
+      str += sprintf("%-5s %-20s %-15s %-10s\n", each.port_number, each.mac_address, each.ip_address.to_s, each.netmask_length)
+    end
+    return str
+  end
 
   def find_by(queries)
     queries.inject(@list) do |memo, (attr, value)|
